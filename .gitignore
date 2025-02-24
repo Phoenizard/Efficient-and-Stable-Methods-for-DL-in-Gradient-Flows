@@ -1,3 +1,4 @@
 SAV_OldVersion/*
 __pycache__/*
 *.pyc
+*.pth
