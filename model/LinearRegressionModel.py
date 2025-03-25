@@ -5,8 +5,8 @@ import torch.nn as nn
 class LinearRegressionModel(nn.Module):
     def __init__(self):
         super(LinearRegressionModel, self).__init__()
-        self.fc1 = nn.Linear(40, 1000)
-        self.fc2 = nn.Linear(1000, 1)
+        self.fc1 = nn.Linear(40, 100)
+        self.fc2 = nn.Linear(100, 1)
         self.div = 1000
         # Initialize the weights and bias
         nn.init.kaiming_uniform_(self.fc1.weight, a=0, mode='fan_in', nonlinearity='relu')
