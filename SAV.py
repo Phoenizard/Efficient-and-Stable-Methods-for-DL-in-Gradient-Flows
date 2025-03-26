@@ -10,20 +10,20 @@ from utilize import flatten_params, unflatten_params, flatten_grad
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
-(x_train, y_train) = torch.load('data/train_data.pt')
-(x_test, y_test) = torch.load('data/test_data.pt')
+(x_train, y_train) = torch.load('data/Gaussian_train_data.pt')
+(x_test, y_test) = torch.load('data/Gaussian_test_data.pt')
 train_dataset = TensorDataset(x_train, y_train)
 test_dataset = TensorDataset(x_test, y_test)
 batch_size = 64
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 #=============================Train Config======================================
-model = LinearModel.SinCosModel(m=256)
+model = LinearModel.SinCosModel(m=100)
 criterion = nn.MSELoss()
 num_epochs = 50000
-C = 0.001
-lambda_ = 100.0
-dt = 0.001 # Δt
+C = 1
+lambda_ = 400
+dt = 0.1 # Δt
 train_losses = []
 test_losses = []
 r = None
@@ -33,13 +33,13 @@ if isRecord:
     run = wandb.init(
         entity="pheonizard-university-of-nottingham",
         project="SAV-base-Optimization",
-        name="1D-SAV-SinCos-Mar26",
+        name="1D-SAV-Gaussian-Mar26",
         config={
             "C": C,
             "lambda": lambda_,
             "learning_rate": dt,
-            "architecture": "[x, 1]->[W, a] with ReLU",
-            "dataset": "y = sin(x) + cos(x) + noise, x in [-2π, 2π]",
+            "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
+            "dataset": "y = exp(-x^2), x in N(0, 0.2)",
             "optimizer": "SAV",
             "epochs": num_epochs,
         },
@@ -104,4 +104,9 @@ plt.legend()
 plt.show()
 
 if isRecord:
+    run.log({
+        "x_test": x_test,
+        "y_Test": y_test,
+        "y_hat": y_predict
+        })
     run.finish()

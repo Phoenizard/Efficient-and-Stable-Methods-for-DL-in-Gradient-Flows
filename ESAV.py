@@ -1,11 +1,12 @@
 from model import LinearModel
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import wandb
+from utilize import flatten_params, unflatten_params, flatten_grad
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
@@ -19,52 +20,67 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 #=============================Train Config======================================
 model = LinearModel.SinCosModel(m=100)
 criterion = nn.MSELoss()
-learning_rate = 0.1
-optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 num_epochs = 50000
-isRecord = True
+C = 1
+lambda_ = 400
+dt = 0.1 # Δt
 train_losses = []
 test_losses = []
+r = None
+isRecord = True
 #=============================Wandb Config======================================
 if isRecord:
     run = wandb.init(
         entity="pheonizard-university-of-nottingham",
         project="SAV-base-Optimization",
-        name="1D-SGD-Gaussian-Mar26",
+        name="1D-ExpSAV-Gaussian-Mar26",
         config={
-            "learning_rate": learning_rate,
-            "architecture": "[x, 1]->[W, a] with ReLU, m=100",
+            "C": C,
+            "lambda": lambda_,
+            "learning_rate": dt,
+            "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
             "dataset": "y = exp(-x^2) + noise, x in N(0, 0.2)",
-            "optimizer": "SGD",
+            "optimizer": "Exp-SAV",
             "epochs": num_epochs,
         },
     )
 #=============================Train=============================================
 for epoch in range(num_epochs):
-        model.train()
-        train_loss = 0.0
-        for batch_x, batch_y in train_loader:
-            optimizer.zero_grad()
-            outputs = model(batch_x)
-            loss = criterion(outputs, batch_y)
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.item() * batch_x.size(0)
-        train_loss /= len(train_dataset)
-        train_losses.append(train_loss)
-
-        model.eval()
-        test_loss = 0.0
+    r = None
+    for X, Y in train_loader:
+        pred = model(X)
+        loss = criterion(pred, Y)  
+        if r is None:
+            r = C * math.exp(loss.item())
+        model.zero_grad()
+        loss.backward()
         with torch.no_grad():
-            for batch_x, batch_y in test_loader:
-                outputs = model(batch_x)
-                loss = criterion(outputs, batch_y)
-                test_loss += loss.item() * batch_x.size(0)
-        test_loss /= len(test_dataset)
+            theta_n = flatten_params(model.W, model.a)
+            grad_n = flatten_grad(model)
+            inv_operator = 1.0 / (1.0 + dt * lambda_)
+            grad_scaled = grad_n * inv_operator
+            
+            alpha = dt / (C * math.exp(loss.item()))
+            theta_n_2 = - alpha * grad_scaled
+
+            dot_val = torch.dot(grad_n, grad_scaled)
+            denom = 1.0 + dt * dot_val
+            r = r / denom
+            # \theta^{n+1} = \theta^{n+1,1} + r^{n+1} * \theta^{n+1,2}
+            theta_n_plus_1 = theta_n + r * theta_n_2
+
+            W_new, a_new = unflatten_params(theta_n_plus_1, model.W.shape, model.a.shape)
+            model.W.copy_(W_new)
+            model.a.copy_(a_new)
+    with torch.no_grad():
+        model.eval()
+        train_loss = criterion(model(x_train), y_train).item()
+        test_loss = criterion(model(x_test), y_test).item()
+        train_losses.append(train_loss)
         test_losses.append(test_loss)
         if isRecord:
             wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "test_loss": test_loss})
-        if (epoch+1) % 100 == 0:
+        if (epoch + 1) % 100 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 #=============================Plot==============================================
 plt.figure(figsize=(8, 6))
@@ -72,9 +88,10 @@ plt.plot(train_losses, label='Train Loss')
 plt.plot(test_losses, label='Test Loss')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.yscale('log')
 plt.legend()
+plt.yscale('log')
 plt.show()
+
 plt.figure(figsize=(8, 6))
 plt.scatter(x_test.numpy(), y_test.numpy(), label='Original Data')
 model.eval()
@@ -87,9 +104,5 @@ plt.legend()
 plt.show()
 
 if isRecord:
-    run.log({
-        "x_test": x_test,
-        "y_Test": y_test,
-        "y_hat": y_predict
-        })
+    run.log({"x_test": x_test, "y_test": y_test,"y_predict": y_predict})
     run.finish()

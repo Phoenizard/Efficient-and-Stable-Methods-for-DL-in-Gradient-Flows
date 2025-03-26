@@ -9,17 +9,17 @@ import wandb
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
-(x_train, y_train) = torch.load('data/train_data.pt')
-(x_test, y_test) = torch.load('data/test_data.pt')
+(x_train, y_train) = torch.load('data/Gaussian_train_data.pt')
+(x_test, y_test) = torch.load('data/Gaussian_test_data.pt')
 train_dataset = TensorDataset(x_train, y_train)
 test_dataset = TensorDataset(x_test, y_test)
 batch_size = 64
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 #=============================Train Config======================================
-model = LinearModel.SinCosModel(m=256)
+model = LinearModel.SinCosModel(m=100)
 criterion = nn.MSELoss()
-learning_rate = 0.001
+learning_rate = 0.1
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 num_epochs = 50000
 train_losses = []
@@ -30,11 +30,11 @@ if isRecord:
     run = wandb.init(
         entity="pheonizard-university-of-nottingham",
         project="SAV-base-Optimization",
-        name="1D-Adam-SinCos-Mar26",
+        name="1D-Adam-Guassion-Mar26",
         config={
             "learning_rate": learning_rate,
-            "architecture": "[x, 1]->[W, a] with ReLU",
-            "dataset": "y = sin(x) + cos(x) + noise, x in [-2π, 2π]",
+            "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
+            "dataset": "y = exp(-x^2), x in N(0, 0.2)",
             "optimizer": "Adam",
             "epochs": num_epochs,
         },
@@ -88,4 +88,9 @@ plt.legend()
 plt.show()
 
 if isRecord:
+    run.log({
+        "x_test": x_test,
+        "y_Test": y_test,
+        "y_hat": y_predict
+    })
     run.finish()
