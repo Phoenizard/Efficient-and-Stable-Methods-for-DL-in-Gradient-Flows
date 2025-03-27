@@ -6,3 +6,5 @@ wandb/*
 draft.py
 # 忽略draft.py
 data/MNIST/raw/*
+data/MNIST_test_data.pt
+data/MNIST_train_data.pt
