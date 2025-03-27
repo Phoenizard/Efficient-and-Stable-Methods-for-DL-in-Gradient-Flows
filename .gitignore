@@ -3,3 +3,6 @@ __pycache__/*
 *.pyc
 *.pth
 wandb/*
+draft.py
+# 忽略draft.py
+data/MNIST/raw/*

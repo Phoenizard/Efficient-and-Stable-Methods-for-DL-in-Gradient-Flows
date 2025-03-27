@@ -9,20 +9,27 @@ import wandb
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
-(x_train, y_train) = torch.load('data/Gaussian_train_data.pt')
-(x_test, y_test) = torch.load('data/Gaussian_test_data.pt')
+(x_train, y_train) = torch.load('data/MNIST_train_data.pt')
+(x_test, y_test) = torch.load('data/MNIST_test_data.pt')
+
+print(x_train.shape, y_train.shape)
+print(x_test.shape, y_test.shape)
+
 train_dataset = TensorDataset(x_train, y_train)
 test_dataset = TensorDataset(x_test, y_test)
-batch_size = 64
+batch_size = 256
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 #=============================Train Config======================================
-model = LinearModel.SinCosModel(m=100)
-criterion = nn.MSELoss()
-learning_rate = 0.1
+m = 1000 # Number of neurons
+# model = LinearModel.SinCosModel(m=m, outputs=10)
+model = LinearModel.ClassificationModel(m=m, inputs=784, outputs=10)
+# criterion = nn.MSELoss()
+criterion = nn.CrossEntropyLoss()
+learning_rate = 0.01
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
-num_epochs = 50000
-isRecord = True
+num_epochs = 1000
+isRecord = False # Change to True if you want to record the training process
 train_losses = []
 test_losses = []
 #=============================Wandb Config======================================
@@ -30,11 +37,11 @@ if isRecord:
     run = wandb.init(
         entity="pheonizard-university-of-nottingham",
         project="SAV-base-Optimization",
-        name="1D-SGD-Gaussian-Mar26",
+        name="SGD-MNIST-Mar26",
         config={
             "learning_rate": learning_rate,
-            "architecture": "[x, 1]->[W, a] with ReLU, m=100",
-            "dataset": "y = exp(-x^2) + noise, x in N(0, 0.2)",
+            "architecture": f"[x, 784]->[W, a] with ReLU, m = {m}",
+            "dataset": "MNIST",
             "optimizer": "SGD",
             "epochs": num_epochs,
         },
@@ -75,16 +82,16 @@ plt.ylabel('Loss')
 plt.yscale('log')
 plt.legend()
 plt.show()
-plt.figure(figsize=(8, 6))
-plt.scatter(x_test.numpy(), y_test.numpy(), label='Original Data')
-model.eval()
-with torch.no_grad():
-    y_predict = model(x_test)
-plt.scatter(x_test.numpy(), y_predict.numpy(), label='Fitted Data')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.legend()
-plt.show()
+# plt.figure(figsize=(8, 6))
+# plt.scatter(x_test.numpy(), y_test.numpy(), label='Original Data')
+# model.eval()
+# with torch.no_grad():
+#     y_predict = model(x_test)
+# plt.scatter(x_test.numpy(), y_predict.numpy(), label='Fitted Data')
+# plt.xlabel('x')
+# plt.ylabel('y')
+# plt.legend()
+# plt.show()
 
 if isRecord:
     run.log({
