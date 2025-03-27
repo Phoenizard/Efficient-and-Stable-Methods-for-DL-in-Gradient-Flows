@@ -38,9 +38,7 @@ class ClassificationModel(nn.Module):
         x_aug = torch.cat([x, ones], dim=1)
         hidden = torch.relu(x_aug @ self.W)
         out = hidden @ self.a
-        # 使用 softmax 函数将输出转换为概率
-        prob = torch.softmax(out, dim=1)
-        return prob
+        return out
 
 
 if __name__ == '__main__':

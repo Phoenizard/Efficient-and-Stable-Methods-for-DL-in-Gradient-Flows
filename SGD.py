@@ -9,11 +9,15 @@ import wandb
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using {device}")
 (x_train, y_train) = torch.load('data/MNIST_train_data.pt')
 (x_test, y_test) = torch.load('data/MNIST_test_data.pt')
 
-print(x_train.shape, y_train.shape)
-print(x_test.shape, y_test.shape)
+x_train = x_train.to(device)
+y_train = y_train.to(device)
+x_test = x_test.to(device)
+y_test = y_test.to(device)
 
 train_dataset = TensorDataset(x_train, y_train)
 test_dataset = TensorDataset(x_test, y_test)
@@ -21,14 +25,15 @@ batch_size = 256
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 #=============================Train Config======================================
-m = 1000 # Number of neurons
+m = 100 # Number of neurons
 # model = LinearModel.SinCosModel(m=m, outputs=10)
 model = LinearModel.ClassificationModel(m=m, inputs=784, outputs=10)
+model.to(device)
 # criterion = nn.MSELoss()
 criterion = nn.CrossEntropyLoss()
-learning_rate = 0.01
+learning_rate = 0.1
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
-num_epochs = 1000
+num_epochs = 100
 isRecord = False # Change to True if you want to record the training process
 train_losses = []
 test_losses = []
@@ -71,8 +76,22 @@ for epoch in range(num_epochs):
         test_losses.append(test_loss)
         if isRecord:
             wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "test_loss": test_loss})
-        if (epoch+1) % 100 == 0:
-            print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
+        
+        print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
+#=============================Test==============================================
+# Test the accuracy for classification
+model.eval()
+correct = 0
+total = 0
+with torch.no_grad():
+    for batch_x, batch_y in test_loader:
+        outputs = model(batch_x)
+        _, predicted = torch.max(outputs.data, 1)
+        total += batch_y.size(0)
+        correct += (predicted == batch_y).sum().item()
+print(f"Accuracy of the network on the 10000 test images: {100 * correct / total}%")
+if isRecord:
+    run.log({"accuracy": 100 * correct / total})        
 #=============================Plot==============================================
 plt.figure(figsize=(8, 6))
 plt.plot(train_losses, label='Train Loss')

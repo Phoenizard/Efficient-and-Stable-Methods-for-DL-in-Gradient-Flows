@@ -2,6 +2,16 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
+import subprocess
+import os
+
+result = subprocess.run('bash -c "source /etc/network_turbo && env | grep proxy"', shell=True, capture_output=True, text=True)
+output = result.stdout
+for line in output.splitlines():
+    if '=' in line:
+        var, value = line.split('=', 1)
+        os.environ[var] = value
+
 
 def download_mnist(data_dir='./data'):
     # 定义数据预处理，转换为 Tensor 格式
@@ -47,10 +57,6 @@ def load_mnist_flat(data_dir='./data'):
     X_test = np.array(X_test)
     Y_test = np.array(Y_test)
     
-    # convert y to one-hot
-    Y_train = np.eye(10)[Y_train]
-    Y_test = np.eye(10)[Y_test]
-    print(Y_train[0], Y_test[0])
     return X_train, Y_train, X_test, Y_test
 
 if __name__ == '__main__':
