@@ -5,14 +5,13 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 import numpy as np
-import wandb
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using {device}")
-(x_train, y_train) = torch.load('data/SinCos_train_data.pt')
-(x_test, y_test) = torch.load('data/SinCos_test_data.pt')
+(x_train, y_train) = torch.load('data/Gaussian_train_data.pt')
+(x_test, y_test) = torch.load('data/Gaussian_test_data.pt')
 x_train = x_train.to(device)
 y_train = y_train.to(device)
 x_test = x_test.to(device)
@@ -24,30 +23,15 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 #=============================Train Config======================================
 m = 100 # Number of neurons
-model = LinearModel.SinCosModel(m=m, outputs=10)
+model = LinearModel.SinCosModel(m=m)
 model.to(device)
 criterion = nn.MSELoss()
 # criterion = nn.CrossEntropyLoss()
 learning_rate = 0.1
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 num_epochs = 100
-isRecord = False # Change to True if you want to record the training process
 train_losses = []
 test_losses = []
-#=============================Wandb Config======================================
-if isRecord:
-    run = wandb.init(
-        entity="pheonizard-university-of-nottingham",
-        project="SAV-base-Optimization",
-        name="SGD-SinCos-Mar26",
-        config={
-            "learning_rate": learning_rate,
-            "architecture": f"[x, 784]->[W, a] with ReLU, m = {m}",
-            "dataset": "y = sin(x) + cos(x)",
-            "optimizer": "SGD",
-            "epochs": num_epochs,
-        },
-    )
 #=============================Train=============================================
 for epoch in range(num_epochs):
         model.train()
@@ -70,10 +54,7 @@ for epoch in range(num_epochs):
                 loss = criterion(outputs, batch_y)
                 test_loss += loss.item() * batch_x.size(0)
         test_loss /= len(test_dataset)
-        test_losses.append(test_loss)
-        if isRecord:
-            wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "test_loss": test_loss})
-        if (epoch+1) % 100 == 0:
+        test_losses.append(test_loss)        if (epoch+1) % 100 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 #=============================Test==============================================
 model.eval()
@@ -97,10 +78,3 @@ plt.ylabel('y')
 plt.legend()
 plt.show()
 
-if isRecord:
-    run.log({
-        "x_test": x_test,
-        "y_Test": y_test,
-        "y_hat": y_predict
-        })
-    run.finish()

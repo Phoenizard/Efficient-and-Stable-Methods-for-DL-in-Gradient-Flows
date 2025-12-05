@@ -5,7 +5,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 import numpy as np
-import wandb
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
@@ -32,23 +31,8 @@ criterion = nn.CrossEntropyLoss()
 learning_rate = 0.1
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 num_epochs = 100
-isRecord = True # Change to True if you want to record the training process
 train_losses = []
 test_losses = []
-#=============================Wandb Config======================================
-if isRecord:
-    run = wandb.init(
-        entity="pheonizard-university-of-nottingham",
-        project="SAV-base-Optimization",
-        name="SGD-MNIST-Mar26",
-        config={
-            "learning_rate": learning_rate,
-            "architecture": f"[x, 784]->[W, a] with ReLU, m = {m}",
-            "dataset": "MNIST",
-            "optimizer": "SGD",
-            "epochs": num_epochs,
-        },
-    )
 #=============================Train=============================================
 for epoch in range(num_epochs):
         model.train()
@@ -76,13 +60,7 @@ for epoch in range(num_epochs):
                 total += batch_y.size(0)
                 correct += (predicted == batch_y).sum().item()
         test_loss /= len(test_dataset)
-        test_losses.append(test_loss)
-        if isRecord:
-            wandb.log({"epoch": epoch + 1, 
-                       "train_loss": train_loss, 
-                       "test_loss": test_loss,
-                       "test_accuracy": 100 * correct / total})
-        
+        test_losses.append(test_loss)        
         print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}, Test Accuracy: {100 * correct / total}%")
 #=============================Plot==============================================
 plt.figure(figsize=(8, 6))
@@ -94,5 +72,3 @@ plt.yscale('log')
 plt.legend()
 plt.show()
 
-if isRecord:
-    run.finish()
