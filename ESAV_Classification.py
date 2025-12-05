@@ -56,7 +56,6 @@ if isRecord:
     )
 #=============================Train=============================================
 for epoch in range(num_epochs):
-    r = None
     for X, Y in train_loader:
         pred = model(X)
         loss = criterion(pred, Y)  

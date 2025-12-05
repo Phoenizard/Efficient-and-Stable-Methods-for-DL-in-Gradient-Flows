@@ -1,0 +1,24 @@
+# Requirements for Efficient and Stable Methods for Deep Learning in Gradient Flows
+
+# Core Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Experiment Tracking (optional)
+wandb>=0.15.0
+
+# Scientific Computing
+scipy>=1.10.0
+
+# Configuration
+pyyaml>=6.0
+
+# Utilities
+tqdm>=4.65.0
