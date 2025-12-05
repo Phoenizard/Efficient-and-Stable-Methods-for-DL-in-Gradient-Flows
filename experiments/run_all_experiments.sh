@@ -2,9 +2,6 @@
 # Comprehensive experiment script for all optimization methods
 # This script runs experiments for SAV, ExpSAV, IEQ, SGD, and Adam on both regression and classification tasks
 
-# Exit on error
-set -e
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -15,15 +12,26 @@ echo "=========================================="
 echo "Starting All Experiments"
 echo "=========================================="
 
-# Create results directory
-mkdir -p results
-mkdir -p results/{SAV,ESAV,IEQ,SGD,Adam}
+# Create results directory structure
+echo "Creating results directories..."
+mkdir -p results/SAV
+mkdir -p results/ESAV
+mkdir -p results/IEQ
+mkdir -p results/SGD
+mkdir -p results/Adam
 
 # Check if MNIST data exists, if not generate it
 if [ ! -f "data/MNIST_train_data.pt" ]; then
     echo -e "${YELLOW}Generating MNIST data...${NC}"
-    cd data/MNIST && python MNIST.py && cd ../..
-    echo -e "${GREEN}MNIST data generated successfully${NC}"
+    (cd data/MNIST && python MNIST.py)
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}MNIST data generated successfully${NC}"
+    else
+        echo -e "${RED}Failed to generate MNIST data${NC}"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}MNIST data already exists${NC}"
 fi
 
 # ==================== Regression Experiments ====================
@@ -34,28 +42,43 @@ echo "==========================================${NC}"
 
 # SAV Regression
 echo -e "${YELLOW}Running SAV Regression...${NC}"
-python SAV_Regression.py > results/SAV/regression_log.txt 2>&1
-echo -e "${GREEN}✓ SAV Regression completed${NC}"
+if python SAV_Regression.py > results/SAV/regression_log.txt 2>&1; then
+    echo -e "${GREEN}✓ SAV Regression completed${NC}"
+else
+    echo -e "${RED}✗ SAV Regression failed${NC}"
+fi
 
 # ExpSAV Regression
 echo -e "${YELLOW}Running ExpSAV Regression...${NC}"
-python ESAV_Regression.py > results/ESAV/regression_log.txt 2>&1
-echo -e "${GREEN}✓ ExpSAV Regression completed${NC}"
+if python ESAV_Regression.py > results/ESAV/regression_log.txt 2>&1; then
+    echo -e "${GREEN}✓ ExpSAV Regression completed${NC}"
+else
+    echo -e "${RED}✗ ExpSAV Regression failed${NC}"
+fi
 
 # IEQ Regression (Full Jacobian)
 echo -e "${YELLOW}Running IEQ Regression (Full Jacobian)...${NC}"
-python IEQ_Regression.py > results/IEQ/regression_full_log.txt 2>&1
-echo -e "${GREEN}✓ IEQ Regression (Full) completed${NC}"
+if python IEQ_Regression.py > results/IEQ/regression_full_log.txt 2>&1; then
+    echo -e "${GREEN}✓ IEQ Regression (Full) completed${NC}"
+else
+    echo -e "${RED}✗ IEQ Regression (Full) failed${NC}"
+fi
 
 # IEQ Regression (Adaptive)
 echo -e "${YELLOW}Running IEQ Regression (Adaptive)...${NC}"
-python IEQ_Regression_Adaptive.py > results/IEQ/regression_adaptive_log.txt 2>&1
-echo -e "${GREEN}✓ IEQ Regression (Adaptive) completed${NC}"
+if python IEQ_Regression_Adaptive.py > results/IEQ/regression_adaptive_log.txt 2>&1; then
+    echo -e "${GREEN}✓ IEQ Regression (Adaptive) completed${NC}"
+else
+    echo -e "${RED}✗ IEQ Regression (Adaptive) failed${NC}"
+fi
 
 # SGD Regression
 echo -e "${YELLOW}Running SGD Regression...${NC}"
-python SGD_Regression.py > results/SGD/regression_log.txt 2>&1
-echo -e "${GREEN}✓ SGD Regression completed${NC}"
+if python SGD_Regression.py > results/SGD/regression_log.txt 2>&1; then
+    echo -e "${GREEN}✓ SGD Regression completed${NC}"
+else
+    echo -e "${RED}✗ SGD Regression failed${NC}"
+fi
 
 # Adam Regression (if exists)
 if [ -f "Adam_Regression.py" ]; then
@@ -72,28 +95,43 @@ echo "==========================================${NC}"
 
 # SAV Classification
 echo -e "${YELLOW}Running SAV Classification...${NC}"
-python SAV_Classification.py > results/SAV/classification_log.txt 2>&1
-echo -e "${GREEN}✓ SAV Classification completed${NC}"
+if python SAV_Classification.py > results/SAV/classification_log.txt 2>&1; then
+    echo -e "${GREEN}✓ SAV Classification completed${NC}"
+else
+    echo -e "${RED}✗ SAV Classification failed${NC}"
+fi
 
 # ExpSAV Classification
 echo -e "${YELLOW}Running ExpSAV Classification...${NC}"
-python ESAV_Classification.py > results/ESAV/classification_log.txt 2>&1
-echo -e "${GREEN}✓ ExpSAV Classification completed${NC}"
+if python ESAV_Classification.py > results/ESAV/classification_log.txt 2>&1; then
+    echo -e "${GREEN}✓ ExpSAV Classification completed${NC}"
+else
+    echo -e "${RED}✗ ExpSAV Classification failed${NC}"
+fi
 
 # IEQ Classification (Full Jacobian)
 echo -e "${YELLOW}Running IEQ Classification (Full Jacobian)...${NC}"
-python IEQ_Classification.py > results/IEQ/classification_full_log.txt 2>&1
-echo -e "${GREEN}✓ IEQ Classification (Full) completed${NC}"
+if python IEQ_Classification.py > results/IEQ/classification_full_log.txt 2>&1; then
+    echo -e "${GREEN}✓ IEQ Classification (Full) completed${NC}"
+else
+    echo -e "${RED}✗ IEQ Classification (Full) failed${NC}"
+fi
 
 # IEQ Classification (Adaptive)
 echo -e "${YELLOW}Running IEQ Classification (Adaptive)...${NC}"
-python IEQ_Classification_Adaptive.py > results/IEQ/classification_adaptive_log.txt 2>&1
-echo -e "${GREEN}✓ IEQ Classification (Adaptive) completed${NC}"
+if python IEQ_Classification_Adaptive.py > results/IEQ/classification_adaptive_log.txt 2>&1; then
+    echo -e "${GREEN}✓ IEQ Classification (Adaptive) completed${NC}"
+else
+    echo -e "${RED}✗ IEQ Classification (Adaptive) failed${NC}"
+fi
 
 # SGD Classification
 echo -e "${YELLOW}Running SGD Classification...${NC}"
-python SGD_Classification.py > results/SGD/classification_log.txt 2>&1
-echo -e "${GREEN}✓ SGD Classification completed${NC}"
+if python SGD_Classification.py > results/SGD/classification_log.txt 2>&1; then
+    echo -e "${GREEN}✓ SGD Classification completed${NC}"
+else
+    echo -e "${RED}✗ SGD Classification failed${NC}"
+fi
 
 # Adam Classification (if exists)
 if [ -f "Adam.py" ]; then

@@ -4,7 +4,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 import numpy as np
-import wandb
 from utilize import flatten_params, unflatten_params, flatten_grad, compute_jacobian_C
 np.random.seed(0)
 torch.manual_seed(0)
@@ -38,21 +37,6 @@ num_epochs = 100
 dt = 0.1 # Δt
 train_losses = []
 test_losses = []
-isRecord = False
-#=============================Wandb Config======================================
-if isRecord:
-    run = wandb.init(
-        entity="pheonizard-university-of-nottingham",
-        project="SAV-base-Optimization",
-        name="1D-IEQ-Gaussian-Mar27",
-        config={
-            "learning_rate": dt,
-            "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
-            "dataset": "y = exp(-x^2), x in N(0, 0.2)",
-            "optimizer": "IEQ",
-            "epochs": num_epochs,
-        },
-    )
 #=============================Train=============================================
 for epoch in range(num_epochs):
     for X, Y in train_loader:
@@ -98,12 +82,7 @@ for epoch in range(num_epochs):
             total += batch_y.size(0)
             accuracy += (predicted == batch_y).sum().item()
         test_loss /= len(test_dataset)
-        test_losses.append(test_loss)
-        if isRecord:
-            wandb.log({"epoch": epoch + 1, 
-                       "train_loss": train_loss, 
-                       "test_loss": test_loss,
-                       "test_accuracy": 100 * accuracy / total})
+        test_losses.append(test_loss)        
         print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}, Test Accuracy: {100 * accuracy / total}%")
 #=============================Plot==============================================
 plt.figure(figsize=(8, 6))
@@ -115,5 +94,3 @@ plt.legend()
 plt.yscale('log')
 plt.show()
 
-if isRecord:
-    run.finish()

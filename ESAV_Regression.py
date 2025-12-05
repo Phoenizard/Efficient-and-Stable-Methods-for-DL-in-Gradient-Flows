@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader, TensorDataset
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import wandb
 from utilize import flatten_params, unflatten_params, flatten_grad
 np.random.seed(0)
 torch.manual_seed(0)
@@ -37,23 +36,6 @@ dt = 0.1 # Δt
 train_losses = []
 test_losses = []
 r = None
-isRecord = False
-#=============================Wandb Config======================================
-if isRecord:
-    run = wandb.init(
-        entity="pheonizard-university-of-nottingham",
-        project="SAV-base-Optimization",
-        name="1D-ExpSAV-Gaussian-Mar26",
-        config={
-            "C": C,
-            "lambda": lambda_,
-            "learning_rate": dt,
-            "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
-            "dataset": "y = exp(-x^2) + noise, x in N(0, 0.2)",
-            "optimizer": "Exp-SAV",
-            "epochs": num_epochs,
-        },
-    )
 #=============================Train=============================================
 for epoch in range(num_epochs):
     for X, Y in train_loader:
@@ -86,11 +68,9 @@ for epoch in range(num_epochs):
         train_loss = criterion(model(x_train), y_train).item()
         test_loss = criterion(model(x_test), y_test).item()
         train_losses.append(train_loss)
-        test_losses.append(test_loss)
-    if isRecord:
-        wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "test_loss": test_loss})
-    if (epoch + 1) % 1000 == 0:
-        print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
+        test_losses.append(test_loss)    
+        if (epoch + 1) % 1000 == 0:
+            print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 #=============================Test==============================================
 model.eval()
 with torch.no_grad():
@@ -113,6 +93,3 @@ plt.ylabel('y')
 plt.legend()
 plt.show()
 
-if isRecord:
-    run.log({"x_test": x_test, "y_test": y_test,"y_predict": y_predict})
-    run.finish()

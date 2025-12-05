@@ -5,7 +5,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 import numpy as np
-import wandb
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
@@ -24,21 +23,6 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 num_epochs = 50000
 train_losses = []
 test_losses = []
-isRecord = True
-#=============================Wandb Config======================================
-if isRecord:
-    run = wandb.init(
-        entity="pheonizard-university-of-nottingham",
-        project="SAV-base-Optimization",
-        name="1D-Adam-Guassion-Mar26",
-        config={
-            "learning_rate": learning_rate,
-            "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
-            "dataset": "y = exp(-x^2), x in N(0, 0.2)",
-            "optimizer": "Adam",
-            "epochs": num_epochs,
-        },
-    )
 #=============================Train=============================================
 for epoch in range(num_epochs):
         model.train()
@@ -62,9 +46,7 @@ for epoch in range(num_epochs):
                 loss = criterion(outputs, batch_y)
                 test_loss += loss.item() * batch_x.size(0)
         test_loss /= len(test_dataset)
-        test_losses.append(test_loss)
-        if isRecord:
-            wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "test_loss": test_loss})
+        test_losses.append(test_loss)        
         if (epoch + 1) % 100 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 #=============================Plot==============================================
@@ -87,10 +69,3 @@ plt.ylabel('y')
 plt.legend()
 plt.show()
 
-if isRecord:
-    run.log({
-        "x_test": x_test,
-        "y_Test": y_test,
-        "y_hat": y_predict
-    })
-    run.finish()

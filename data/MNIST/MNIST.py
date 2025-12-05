@@ -2,31 +2,6 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
-import subprocess
-import os
-
-result = subprocess.run('bash -c "source /etc/network_turbo && env | grep proxy"', shell=True, capture_output=True, text=True)
-output = result.stdout
-for line in output.splitlines():
-    if '=' in line:
-        var, value = line.split('=', 1)
-        os.environ[var] = value
-
-
-def download_mnist(data_dir='./data'):
-    # 定义数据预处理，转换为 Tensor 格式
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-
-    # 下载 MNIST 训练集和测试集
-    train_set = torchvision.datasets.MNIST(root=data_dir, train=True, download=False, transform=transform)
-    test_set = torchvision.datasets.MNIST(root=data_dir, train=False, download=False, transform=transform)
-    
-    print(f"MNIST 数据集已下载到目录 {data_dir}")
-    print(f"训练集样本数量：{len(train_set)}")
-    print(f"测试集样本数量：{len(test_set)}")
-
 
 def load_mnist_flat(data_dir='./data'):
     # 定义数据预处理：先转为 tensor，再将图片展平成一维向量（28x28=784）
@@ -34,11 +9,11 @@ def load_mnist_flat(data_dir='./data'):
         transforms.ToTensor(),                      # 转为 tensor，形状为 (1, 28, 28)
         transforms.Lambda(lambda x: x.view(-1))       # 将 tensor 展平成一维向量，形状为 (784,)
     ])
-    
+
     # 下载 MNIST 数据集（训练集和测试集）
-    train_dataset = torchvision.datasets.MNIST(root=data_dir, train=True, download=False, transform=transform)
-    test_dataset = torchvision.datasets.MNIST(root=data_dir, train=False, download=False, transform=transform)
-    
+    train_dataset = torchvision.datasets.MNIST(root=data_dir, train=True, download=True, transform=transform)
+    test_dataset = torchvision.datasets.MNIST(root=data_dir, train=False, download=True, transform=transform)
+
     # 构造 X_train, Y_train
     X_train = []
     Y_train = []
@@ -47,7 +22,7 @@ def load_mnist_flat(data_dir='./data'):
         Y_train.append(label)
     X_train = np.array(X_train)
     Y_train = np.array(Y_train)
-    
+
     # 构造 X_test, Y_test
     X_test = []
     Y_test = []
@@ -56,7 +31,7 @@ def load_mnist_flat(data_dir='./data'):
         Y_test.append(label)
     X_test = np.array(X_test)
     Y_test = np.array(Y_test)
-    
+
     return X_train, Y_train, X_test, Y_test
 
 if __name__ == '__main__':
