@@ -8,3 +8,6 @@ draft.py
 data/MNIST/raw/*
 data/MNIST_test_data.pt
 data/MNIST_train_data.pt
+data/MNIST/data/MNIST_test_data.pt
+data/MNIST/data/MNIST_train_data.pt
+data/MNIST/data/MNIST/raw/*

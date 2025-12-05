@@ -10,8 +10,8 @@ torch.manual_seed(0)
 #=============================Load Data=========================================
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using {device}")
-(x_train, y_train) = torch.load('data/MNIST_train_data.pt')
-(x_test, y_test) = torch.load('data/MNIST_test_data.pt')
+(x_train, y_train) = torch.load('data/MNIST/data/MNIST_train_data.pt')
+(x_test, y_test) = torch.load('data/MNIST/data/MNIST_test_data.pt')
 
 x_train = x_train.to(device)
 y_train = y_train.to(device)
@@ -35,33 +35,33 @@ train_losses = []
 test_losses = []
 #=============================Train=============================================
 for epoch in range(num_epochs):
-        model.train()
-        train_loss = 0.0
-        for batch_x, batch_y in train_loader:
-            optimizer.zero_grad()
+    model.train()
+    train_loss = 0.0
+    for batch_x, batch_y in train_loader:
+        optimizer.zero_grad()
+        outputs = model(batch_x)
+        loss = criterion(outputs, batch_y)
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item() * batch_x.size(0)
+    train_loss /= len(train_dataset)
+    train_losses.append(train_loss)
+
+    model.eval()
+    test_loss = 0.0
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for batch_x, batch_y in test_loader:
             outputs = model(batch_x)
             loss = criterion(outputs, batch_y)
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.item() * batch_x.size(0)
-        train_loss /= len(train_dataset)
-        train_losses.append(train_loss)
-
-        model.eval()
-        test_loss = 0.0
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for batch_x, batch_y in test_loader:
-                outputs = model(batch_x)
-                loss = criterion(outputs, batch_y)
-                test_loss += loss.item() * batch_x.size(0)
-                _, predicted = torch.max(outputs.data, 1)
-                total += batch_y.size(0)
-                correct += (predicted == batch_y).sum().item()
-        test_loss /= len(test_dataset)
-        test_losses.append(test_loss)        
-        print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}, Test Accuracy: {100 * correct / total}%")
+            test_loss += loss.item() * batch_x.size(0)
+            _, predicted = torch.max(outputs.data, 1)
+            total += batch_y.size(0)
+            correct += (predicted == batch_y).sum().item()
+    test_loss /= len(test_dataset)
+    test_losses.append(test_loss)        
+    print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}, Test Accuracy: {100 * correct / total}%")
 #=============================Plot==============================================
 plt.figure(figsize=(8, 6))
 plt.plot(train_losses, label='Train Loss')

@@ -54,7 +54,8 @@ for epoch in range(num_epochs):
                 loss = criterion(outputs, batch_y)
                 test_loss += loss.item() * batch_x.size(0)
         test_loss /= len(test_dataset)
-        test_losses.append(test_loss)        if (epoch+1) % 100 == 0:
+        test_losses.append(test_loss)        
+        if (epoch+1) % 100 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 #=============================Test==============================================
 model.eval()

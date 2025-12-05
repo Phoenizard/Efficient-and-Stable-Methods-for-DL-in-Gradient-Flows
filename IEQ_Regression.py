@@ -53,7 +53,8 @@ for epoch in range(num_epochs):
         train_loss = criterion(model(x_train), y_train).item()
         test_loss = criterion(model(x_test), y_test).item()
         train_losses.append(train_loss)
-        test_losses.append(test_loss)        if (epoch + 1) % 10 == 0:
+        test_losses.append(test_loss)        
+        if (epoch + 1) % 10 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 #=============================Plot==============================================
 plt.figure(figsize=(8, 6))
