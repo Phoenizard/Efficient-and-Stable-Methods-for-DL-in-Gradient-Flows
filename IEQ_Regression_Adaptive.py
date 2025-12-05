@@ -2,7 +2,6 @@ from model import LinearModel
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 import wandb
@@ -31,26 +30,24 @@ model = LinearModel.SinCosModel(m=100)
 model.to(device)
 criterion = nn.MSELoss()
 num_epochs = 50000
-C = 1
-lambda_ = 1
 dt = 0.1 # Δt
+epsilon = 1e-8 # Regularization parameter
 train_losses = []
 test_losses = []
-r = None
+q = None
 isRecord = False
 #=============================Wandb Config======================================
 if isRecord:
     run = wandb.init(
         entity="pheonizard-university-of-nottingham",
         project="SAV-base-Optimization",
-        name="1D-ExpSAV-Gaussian-Mar26",
+        name="1D-IEQ-Adaptive-Gaussian-Mar27",
         config={
-            "C": C,
-            "lambda": lambda_,
             "learning_rate": dt,
+            "epsilon": epsilon,
             "architecture": "[x, 1]->[W, a] with ReLU, m = 100",
             "dataset": "y = exp(-x^2) + noise, x in N(0, 0.2)",
-            "optimizer": "Exp-SAV",
+            "optimizer": "IEQ-Adaptive",
             "epochs": num_epochs,
         },
     )
@@ -58,29 +55,34 @@ if isRecord:
 for epoch in range(num_epochs):
     for X, Y in train_loader:
         pred = model(X)
-        loss = criterion(pred, Y)  
-        if r is None:
-            r = C * math.exp(loss.item())
+        loss = criterion(pred, Y)
+
+        # Initialize auxiliary variable q = f(w) - y
+        if q is None:
+            q = pred.detach() - Y
+
         model.zero_grad()
         loss.backward()
+
         with torch.no_grad():
             theta_n = flatten_params(model.W, model.a)
             grad_n = flatten_grad(model)
-            inv_operator = 1.0 / (1.0 + dt * lambda_)
-            grad_scaled = grad_n * inv_operator
-            
-            alpha = dt / (C * math.exp(loss.item()))
-            theta_n_2 = - alpha * grad_scaled
 
-            dot_val = torch.dot(grad_n, grad_scaled)
-            denom = 1.0 + dt * dot_val
-            r = r / denom
-            # \theta^{n+1} = \theta^{n+1,1} + r^{n+1} * \theta^{n+1,2}
-            theta_n_plus_1 = theta_n + r * theta_n_2
+            # Compute adaptive scaling factor α^n
+            grad_norm_sq = torch.norm(grad_n) ** 2
+            q_norm_sq = torch.norm(q) ** 2
+            alpha = 1.0 / (1.0 + dt * grad_norm_sq / (q_norm_sq + epsilon))
+
+            # Update parameters: w^{n+1} = w^n - Δt α^n ∇L(w^n)
+            theta_n_plus_1 = theta_n - dt * alpha * grad_n
 
             W_new, a_new = unflatten_params(theta_n_plus_1, model.W.shape, model.a.shape)
             model.W.copy_(W_new)
             model.a.copy_(a_new)
+
+            # Update auxiliary variable: q^{n+1} = q^n / (1 + Δt ||∇L||^2 / (||q||^2 + ε))
+            q = q / (1.0 + dt * grad_norm_sq / (q_norm_sq + epsilon))
+
     with torch.no_grad():
         model.eval()
         train_loss = criterion(model(x_train), y_train).item()
@@ -106,8 +108,8 @@ plt.yscale('log')
 plt.show()
 
 plt.figure(figsize=(8, 6))
-plt.scatter(x_test.numpy(), y_test.numpy(), label='Original Data')
-plt.scatter(x_test.numpy(), y_predict.numpy(), label='Fitted Data')
+plt.scatter(x_test.cpu().numpy(), y_test.cpu().numpy(), label='Original Data')
+plt.scatter(x_test.cpu().numpy(), y_predict.cpu().numpy(), label='Fitted Data')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.legend()
