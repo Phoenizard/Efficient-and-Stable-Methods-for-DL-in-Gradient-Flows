@@ -1,0 +1,177 @@
+# Experiment Configuration for All Methods
+# This file documents the hyperparameters used for each optimization method
+
+# ============================================================
+# Regression Task Configuration (Gaussian Data)
+# ============================================================
+regression:
+  dataset:
+    name: "Gaussian"
+    description: "y = exp(-x^2) + noise, x ~ N(0, 0.2)"
+    train_file: "data/Gaussian_train_data.pt"
+    test_file: "data/Gaussian_test_data.pt"
+    batch_size: 256
+
+  model:
+    architecture: "Two-layer Neural Network with ReLU"
+    input_dim: 1
+    hidden_neurons: 100  # m = 100
+    output_dim: 1
+    activation: "ReLU"
+
+  training:
+    num_epochs: 50000
+    criterion: "MSELoss"
+
+  methods:
+    SAV:
+      C: 100
+      lambda: 4
+      dt: 0.1
+      description: "Original SAV with r = sqrt(L + C)"
+
+    ExpSAV:
+      C: 1.0
+      lambda: 1.0
+      dt: 0.1
+      description: "Exponential SAV with r = C * exp(L)"
+
+    IEQ_Full:
+      dt: 0.1
+      description: "Full Jacobian method, O(n^3) complexity"
+
+    IEQ_Adaptive:
+      dt: 0.1
+      epsilon: 1.0e-8
+      description: "Adaptive step size method, O(n) complexity"
+
+    SGD:
+      learning_rate: 0.001
+      description: "Standard SGD baseline"
+
+    Adam:
+      learning_rate: 0.001
+      beta1: 0.9
+      beta2: 0.999
+      description: "Adam optimizer baseline"
+
+# ============================================================
+# Classification Task Configuration (MNIST)
+# ============================================================
+classification:
+  dataset:
+    name: "MNIST"
+    description: "28x28 handwritten digit images, 10 classes"
+    train_file: "data/MNIST_train_data.pt"
+    test_file: "data/MNIST_test_data.pt"
+    batch_size: 256
+    num_classes: 10
+
+  model:
+    architecture: "Two-layer Neural Network with ReLU"
+    input_dim: 784  # 28 * 28
+    hidden_neurons: 100  # m = 100
+    output_dim: 10
+    activation: "ReLU"
+
+  training:
+    num_epochs: 100
+    criterion: "CrossEntropyLoss"
+
+  methods:
+    SAV:
+      C: 100
+      lambda: 4
+      dt: 0.1
+      description: "Original SAV with r = sqrt(L + C)"
+
+    ExpSAV:
+      C: 1.0
+      lambda: 0.0
+      dt: 0.1
+      description: "Exponential SAV with r = C * exp(L)"
+
+    IEQ_Full:
+      dt: 0.1
+      description: "Full Jacobian method with one-hot encoding"
+
+    IEQ_Adaptive:
+      dt: 0.1
+      epsilon: 1.0e-8
+      description: "Adaptive step size method"
+
+    SGD:
+      learning_rate: 0.001
+      description: "Standard SGD baseline"
+
+    Adam:
+      learning_rate: 0.001
+      beta1: 0.9
+      beta2: 0.999
+      description: "Adam optimizer baseline"
+
+# ============================================================
+# Expected Results Summary
+# ============================================================
+expected_results:
+  regression:
+    description: "Convergence behavior on Gaussian data fitting"
+    metrics:
+      - "Train MSE Loss"
+      - "Test MSE Loss"
+      - "Convergence Speed"
+      - "Training Stability"
+
+    expected_performance:
+      ExpSAV: "Stable convergence, better than original SAV"
+      IEQ_Adaptive: "Fast convergence with O(n) complexity"
+      IEQ_Full: "High accuracy but slower due to O(n^3) cost"
+      SAV: "May show instability at low loss values"
+      Adam: "Fast initial convergence, competitive baseline"
+      SGD: "Slowest convergence, baseline comparison"
+
+  classification:
+    description: "MNIST digit classification accuracy"
+    metrics:
+      - "Train Cross-Entropy Loss"
+      - "Test Accuracy (%)"
+      - "Training Time per Epoch"
+      - "Convergence Stability"
+
+    expected_performance:
+      ExpSAV: "90-95% accuracy, stable training"
+      IEQ_Adaptive: "90-95% accuracy, efficient"
+      IEQ_Full: "90-95% accuracy, slower training"
+      SAV: "Similar to ExpSAV but less stable"
+      Adam: "95%+ accuracy, strong baseline"
+      SGD: "85-90% accuracy, baseline"
+
+# ============================================================
+# Computational Complexity Analysis
+# ============================================================
+complexity:
+  per_iteration_cost:
+    SAV: "O(n) + O(n^2) for Hessian approximation"
+    ExpSAV: "O(n) + O(n^2) for Hessian approximation"
+    IEQ_Full: "O(n^3) for matrix inversion"
+    IEQ_Adaptive: "O(n) gradient computation only"
+    SGD: "O(n) gradient computation only"
+    Adam: "O(n) gradient computation + momentum updates"
+
+  memory_usage:
+    SAV: "O(n^2) for Hessian"
+    ExpSAV: "O(n^2) for Hessian"
+    IEQ_Full: "O(batch_size^2) for Jacobian"
+    IEQ_Adaptive: "O(n) parameters only"
+    SGD: "O(n) parameters only"
+    Adam: "O(n) parameters + momentum"
+
+# ============================================================
+# Reproducibility Settings
+# ============================================================
+reproducibility:
+  random_seed: 0
+  torch_seed: 0
+  numpy_seed: 0
+  device: "cuda if available else cpu"
+  deterministic: true

@@ -241,22 +241,44 @@ for epoch in range(num_epochs):
 
 ## Experiments
 
+### Quick Start
+
+To run all experiments:
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run all experiments
+chmod +x experiments/run_all_experiments.sh
+./experiments/run_all_experiments.sh
+
+# View results summary
+python experiments/summarize_results.py
+```
+
+For detailed experimental results and analysis, see **[EXPERIMENTS.md](EXPERIMENTS.md)**.
+
 ### Regression Task
 - **Dataset:** Gaussian noise data, $y = \exp(-x^2) + \epsilon$
 - **Model:** Two-layer neural network with ReLU activation (m=100 neurons)
 - **Metrics:** MSE loss on train/test sets
+- **Expected:** ExpSAV and IEQ achieve test loss ~10⁻⁵
 
 ### Classification Task
 - **Dataset:** MNIST handwritten digits
 - **Model:** Two-layer neural network (784 → 100 → 10)
 - **Metrics:** Cross-entropy loss and accuracy
+- **Expected:** ExpSAV and IEQ achieve 92-94% accuracy
 
 ### Results
-See `img/` folder for detailed experimental results comparing:
-- SAV vs ExpSAV vs IEQ
-- SGD and Adam baselines
-- Training loss curves
-- Test accuracy plots
+- **Detailed Analysis:** See [EXPERIMENTS.md](EXPERIMENTS.md)
+- **Experiment Configs:** See [experiments/experiment_config.yaml](experiments/experiment_config.yaml)
+- **Implementation Results:** See `img/` folder for method-specific results:
+  - `img/SAV/` - Original SAV results
+  - `img/ESAV/` - ExpSAV results
+  - `img/IEQ/` - IEQ (Full & Adaptive) results
+  - `img/SGD/` - SGD baseline
+  - `img/Adam/` - Adam baseline
 
 ---
 
