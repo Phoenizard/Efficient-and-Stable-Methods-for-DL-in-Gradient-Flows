@@ -10,6 +10,7 @@ We implement three main approaches:
 3. **IEQ (Invariant Energy Quadratization)** - Quadratization-based method with adaptive step size
 
 All methods are based on the gradient flow framework for optimization in deep learning:
+
 $$
 \frac{\partial w}{\partial t} = -\nabla_w E(w)
 $$
@@ -25,6 +26,7 @@ where $E(w)$ is the energy functional (typically loss function + regularization)
 The original SAV method introduces an auxiliary variable $r = \sqrt{L(w) + C}$ to stabilize the gradient flow.
 
 **Update equations:**
+
 $$
 \begin{aligned}
 w^{n+1,*} &= -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
@@ -51,6 +53,7 @@ r = C \cdot \exp(L(w))
 $$
 
 **Stable update scheme (without $r^{-n}$ terms):**
+
 $$
 \begin{aligned}
 w^{n+1,*} &= -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
@@ -83,6 +86,7 @@ IEQ transforms the loss function into a quadratic form using auxiliary variables
 #### Version A: Full Jacobian Method (High Precision)
 
 **Update equations:**
+
 $$
 \begin{aligned}
 J &= \nabla_w f(w^n) \quad \text{(Jacobian matrix)} \\
@@ -96,11 +100,13 @@ $$
 #### Version B: Adaptive Step Size Method (Efficient)
 
 **Simplified approximation:**
+
 $$
 \|g\|^2 \approx \frac{\|\nabla_w L(w^n)\|^2}{\|q^n\|^2}
 $$
 
 **Update equations:**
+
 $$
 \begin{aligned}
 q^{n+1} &= \frac{q^n}{1 + \Delta t \frac{\|\nabla_w L(w^n)\|^2}{\|q^n\|^2 + \epsilon}} \\
@@ -109,6 +115,7 @@ w^{n+1} &= w^n - \Delta t \alpha^n \nabla_w L(w^n)
 $$
 
 where the adaptive scaling factor is:
+
 $$
 \alpha^n = \frac{1}{1 + \Delta t \frac{\|\nabla_w L(w^n)\|^2}{\|q^n\|^2 + \epsilon}}
 $$
@@ -129,11 +136,13 @@ The relaxed approach combines dynamically computed intermediate values with idea
 - **Intermediate value** $\tilde{v}^{n+1}$: Computed from recursive formulas in base algorithms
 
 **Relaxation update:**
+
 $$
 v^{n+1} = \xi_0 \hat{v}^{n+1} + (1-\xi_0)\tilde{v}^{n+1}
 $$
 
 where $\xi_0 \in [0,1]$ is determined by:
+
 $$
 \xi_0 = \min_{\xi \in [0,1]} \xi \quad \text{subject to energy dissipation constraints}
 $$
