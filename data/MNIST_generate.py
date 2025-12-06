@@ -32,9 +32,9 @@ transform = transforms.Compose([
 ])
 
 # Set MNIST mirror to use alternative download source
-torchvision.datasets.MNIST.mirrors = [
-    'https://cloudflare-ipfs.com/ipfs/QmRRCWziYXAwKpDuZJsnkiwRJ3Y8pCdCw1PxNBT2u3oN9/',
-]
+# torchvision.datasets.MNIST.mirrors = [
+#     'https://cloudflare-ipfs.com/ipfs/QmRRCWziYXAwKpDuZJsnkiwRJ3Y8pCdCw1PxNBT2u3oN9/',
+# ]
 
 try:
     # Download training data

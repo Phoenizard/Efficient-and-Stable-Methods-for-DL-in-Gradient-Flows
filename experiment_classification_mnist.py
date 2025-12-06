@@ -13,8 +13,8 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from algorithms import (sgd_classification, sav_classification,
-                        esav_classification, ieq_adaptive_classification)
+from algorithms import (sgd_classification,sav_classification,
+                        esav_classification, ieq_adaptive_classification, ieq_classification)
 
 # Set random seed
 np.random.seed(0)
@@ -47,7 +47,7 @@ print(f"Using device: {device}")
 m = 100  # Number of neurons
 inputs = 784  # 28x28 images flattened
 outputs = 10  # 10 classes
-num_epochs = 10
+num_epochs = 50
 
 # Store all results
 results = {}
@@ -79,6 +79,17 @@ hist_esav = esav_classification(x_train, y_train, x_test, y_test,
                                 num_epochs=num_epochs, inputs=inputs, outputs=outputs,
                                 device=device)
 results['ExpSAV'] = hist_esav
+
+
+print("\n" + "="*60)
+print("Running IEQ...")
+print("="*60)
+hist_ieq = ieq_classification(x_train, y_train, x_test, y_test,
+                              m=m, batch_size=256, dt=0.1,
+                              num_epochs=num_epochs, inputs=inputs, outputs=outputs,
+                              device=device)
+results['IEQ'] = hist_ieq
+
 
 print("\n" + "="*60)
 print("Running IEQ Adaptive...")
