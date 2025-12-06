@@ -50,14 +50,19 @@ for epoch in range(num_epochs):
             grad_n = flatten_grad(model)
             inv_operator = 1.0 / (1.0 + dt * lambda_)
             grad_scaled = grad_n * inv_operator
-            
-            alpha = dt / (C * math.exp(loss.item()))
-            theta_n_2 = - alpha * grad_scaled
 
-            dot_val = torch.dot(grad_n, grad_scaled)
-            denom = 1.0 + dt * dot_val
-            r = r / denom
-            # \theta^{n+1} = \theta^{n+1,1} + r^{n+1} * \theta^{n+1,2}
+            # Save r^n before updating
+            r_n = r
+
+            # Update r: r^{n+1} = (r^n)^2 / (r^n + Δt·S^n)
+            dot_val = torch.dot(grad_n, grad_scaled)  # S^n
+            denom = 1.0 + dt * dot_val / r_n
+            r = r_n / denom
+
+            # Parameter update: w^{n+1} = w^n - (Δt·r^{n+1}/(r^n)^2)·g̃^n
+            alpha = dt / (r_n * r_n)
+            theta_n_2 = - alpha * grad_scaled
+            # \theta^{n+1} = \theta^{n} + r^{n+1} * \theta^{n+1,2}
             theta_n_plus_1 = theta_n + r * theta_n_2
 
             W_new, a_new = unflatten_params(theta_n_plus_1, model.W.shape, model.a.shape)
