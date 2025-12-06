@@ -39,8 +39,8 @@ print(f"Data loaded: Train={x_train.shape[0]}, Test={x_test.shape[0]}, Dim={x_tr
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Using device: {device}")
 m = 1000  # Number of neurons
-num_epochs_standard = 100
-num_epochs_sav = 50000
+num_epochs_standard = 1000
+num_epochs_sav = 1000
 
 # Store all results
 results = {}
