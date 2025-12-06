@@ -26,7 +26,6 @@ where $E(w)$ is the energy functional (typically loss function + regularization)
 The original SAV method introduces an auxiliary variable $r = \sqrt{L(w) + C}$ to stabilize the gradient flow.
 
 **Update equations:**
-
 $$
 w^{n+1,*} = -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
 S^n = \langle \nabla_w L(w^n), (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \rangle \\
@@ -45,10 +44,7 @@ $$
 
 ExpSAV uses an exponential auxiliary variable to avoid gradient vanishing/explosion issues in the original SAV formulation.
 
-**Auxiliary variable:**
-$$
-r = C \cdot \exp(L(w))
-$$
+**Auxiliary variable:** $r = C \cdot \exp(L(w))$
 
 **Stable update scheme (without $r^{-n}$ terms):**
 
