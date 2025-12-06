@@ -35,14 +35,16 @@ lambda_ = 1
 dt = 0.1 # Δt
 train_losses = []
 test_losses = []
-r = None
+# Initialize auxiliary variable r with initial loss on full training data
+with torch.no_grad():
+    initial_loss = criterion(model(x_train), y_train).item()
+    r = C * math.exp(initial_loss)
+    print(f"Initial loss: {initial_loss:.8f}, Initial r: {r:.8f}")
 #=============================Train=============================================
 for epoch in range(num_epochs):
     for X, Y in train_loader:
         pred = model(X)
-        loss = criterion(pred, Y)  
-        if r is None:
-            r = C * math.exp(loss.item())
+        loss = criterion(pred, Y)
         model.zero_grad()
         loss.backward()
         with torch.no_grad():
