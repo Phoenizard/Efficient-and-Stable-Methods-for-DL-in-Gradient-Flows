@@ -34,17 +34,17 @@ dt = 0.1 # Δt
 epsilon = 1e-8 # Regularization parameter
 train_losses = []
 test_losses = []
-q = None
+# Initialize auxiliary variable q = f(w) - y with initial prediction on full training data
+with torch.no_grad():
+    initial_pred = model(x_train)
+    y_train_onehot = nn.functional.one_hot(y_train, num_classes=outputs).float()
+    q = initial_pred - y_train_onehot
+    print(f"Initial q norm: {torch.norm(q).item():.8f}")
 #=============================Train=============================================
 for epoch in range(num_epochs):
     for X, Y in train_loader:
         pred = model(X)
         loss = criterion(pred, Y)
-
-        # Initialize auxiliary variable q = f(w) - y (one-hot encoding)
-        if q is None:
-            y_onehot = nn.functional.one_hot(Y, num_classes=outputs).float()
-            q = pred.detach() - y_onehot
 
         model.zero_grad()
         loss.backward()
