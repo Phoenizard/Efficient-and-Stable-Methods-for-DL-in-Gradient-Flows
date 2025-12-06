@@ -28,12 +28,10 @@ The original SAV method introduces an auxiliary variable $r = \sqrt{L(w) + C}$ t
 **Update equations:**
 
 $$
-\begin{aligned}
-w^{n+1,*} &= -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
-S^n &= \langle \nabla_w L(w^n), (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \rangle \\
-r^{n+1} &= \frac{r^n}{1 + \Delta t \frac{S^n}{2(L(w^n) + C)}} \\
-w^{n+1} &= w^n + \frac{r^{n+1}}{r^n} w^{n+1,*}
-\end{aligned}
+w^{n+1,*} = -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
+S^n = \langle \nabla_w L(w^n), (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \rangle \\
+r^{n+1} = \frac{r^n}{1 + \Delta t \frac{S^n}{2(L(w^n) + C)}} \\
+w^{n+1} = w^n + \frac{r^{n+1}}{r^n} w^{n+1,*}
 $$
 
 **Properties:**
@@ -55,12 +53,10 @@ $$
 **Stable update scheme (without $r^{-n}$ terms):**
 
 $$
-\begin{aligned}
-w^{n+1,*} &= -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
-S^n &= \langle \nabla_w L(w^n), (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \rangle \\
-r^{n+1} &= \frac{r^n}{1 + \Delta t S^n} \\
-w^{n+1} &= w^n + \frac{r^{n+1}}{r^n} w^{n+1,*}
-\end{aligned}
+w^{n+1,*} = -\Delta t (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \\
+S^n = \langle \nabla_w L(w^n), (I + \Delta t\mathcal{L})^{-1}\nabla_w L(w^n) \rangle \\
+r^{n+1} = \frac{r^n}{1 + \Delta t S^n} \\
+w^{n+1} = w^n + \frac{r^{n+1}}{r^n} w^{n+1,*}
 $$
 
 **Key advantages:**
@@ -88,11 +84,9 @@ IEQ transforms the loss function into a quadratic form using auxiliary variables
 **Update equations:**
 
 $$
-\begin{aligned}
-J &= \nabla_w f(w^n) \quad \text{(Jacobian matrix)} \\
-q^{n+1} &= (I + \Delta t J J^T)^{-1} q^n \\
-w^{n+1} &= w^n - \Delta t J^T q^{n+1}
-\end{aligned}
+J = \nabla_w f(w^n) \quad \text{(Jacobian matrix)} \\
+q^{n+1} = (I + \Delta t J J^T)^{-1} q^n \\
+w^{n+1} = w^n - \Delta t J^T q^{n+1}
 $$
 
 **Computational complexity:** $O(n^3)$ due to matrix inversion
@@ -108,10 +102,8 @@ $$
 **Update equations:**
 
 $$
-\begin{aligned}
-q^{n+1} &= \frac{q^n}{1 + \Delta t \frac{\|\nabla_w L(w^n)\|^2}{\|q^n\|^2 + \epsilon}} \\
-w^{n+1} &= w^n - \Delta t \alpha^n \nabla_w L(w^n)
-\end{aligned}
+q^{n+1} = \frac{q^n}{1 + \Delta t \frac{\|\nabla_w L(w^n)\|^2}{\|q^n\|^2 + \epsilon}} \\
+w^{n+1} = w^n - \Delta t \alpha^n \nabla_w L(w^n)
 $$
 
 where the adaptive scaling factor is:

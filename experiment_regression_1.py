@@ -31,8 +31,8 @@ print("="*60)
 
 # Load data
 print("\nLoading data...")
-(x_train, y_train) = torch.load('data/Example1_train_data.pt')
-(x_test, y_test) = torch.load('data/Example1_test_data.pt')
+(x_train, y_train) = torch.load('data/experiment_1_train_data.pt')
+(x_test, y_test) = torch.load('data/experiment_1_train_data.pt')
 print(f"Data loaded: Train={x_train.shape[0]}, Test={x_test.shape[0]}, Dim={x_train.shape[1]}")
 
 # Configuration
