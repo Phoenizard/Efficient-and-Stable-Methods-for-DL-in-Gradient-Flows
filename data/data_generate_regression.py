@@ -82,7 +82,7 @@ print(f"     Test:  {x_test_2.shape[0]} samples")
 # ============================================================
 print("\n3. Generating Experiment 3 data (Gaussian function)...")
 D = 40  # Dimension
-M = 100000  # Larger dataset for this challenging problem
+M = 1000  # Larger dataset for this challenging problem
 
 # Use normal distribution as mentioned in paper
 x_data = np.random.normal(0, 0.2, (M, D))

@@ -70,7 +70,7 @@ def sgd_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
             test_loss = criterion(model(x_test), y_test).item()
             test_losses.append(test_loss)
 
-        if (epoch + 1) % 100 == 0:
+        if (epoch + 1) % 10 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 
     return {'train_loss': train_losses, 'test_loss': test_losses, 'model': model}
@@ -187,7 +187,7 @@ def adam_regression(x_train, y_train, x_test, y_test, m=100, batch_size=64,
             test_loss = criterion(model(x_test), y_test).item()
             test_losses.append(test_loss)
 
-        if (epoch + 1) % 100 == 0:
+        if (epoch + 1) % 10 == 0:
             print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 
     return {'train_loss': train_losses, 'test_loss': test_losses, 'model': model}
@@ -262,7 +262,7 @@ def sav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
             train_losses.append(train_loss)
             test_losses.append(test_loss)
 
-            if (epoch + 1) % 100 == 0:
+            if (epoch + 1) % 10 == 0:
                 print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 
     return {'train_loss': train_losses, 'test_loss': test_losses, 'model': model}
@@ -416,7 +416,7 @@ def esav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
             train_losses.append(train_loss)
             test_losses.append(test_loss)
 
-            if (epoch + 1) % 1000 == 0:
+            if (epoch + 1) % 10 == 0:
                 print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 
     return {'train_loss': train_losses, 'test_loss': test_losses, 'model': model}
@@ -499,8 +499,8 @@ def esav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
             test_losses.append(test_loss)
             accuracy = 100 * correct / total
             test_accuracies.append(accuracy)
-
-            print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}, Test Accuracy: {accuracy:.2f}%")
+            if (epoch + 1) % 10 == 0:
+                print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}, Test Accuracy: {accuracy:.2f}%")
 
     return {'train_loss': train_losses, 'test_loss': test_losses, 'test_accuracy': test_accuracies, 'model': model}
 

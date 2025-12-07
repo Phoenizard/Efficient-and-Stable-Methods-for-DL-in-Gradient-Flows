@@ -36,6 +36,8 @@ device = 'cuda' if torch.cuda.is_available() else \
 print(f"Using device: {device}")
 m = 1000  # Large number of neurons for this challenging problem
 num_epochs = 100
+batchsize = 256
+
 
 # Store all results
 results = {}
@@ -45,7 +47,7 @@ print("\n" + "="*60)
 print("Running SGD...")
 print("="*60)
 hist_sgd = sgd_regression(x_train, y_train, x_test, y_test,
-                          m=m, batch_size=256, learning_rate=0.01,
+                          m=m, batch_size=batchsize, learning_rate=0.01,
                           num_epochs=num_epochs, device=device)
 results['SGD'] = hist_sgd
 
@@ -53,7 +55,7 @@ print("\n" + "="*60)
 print("Running Adam...")
 print("="*60)
 hist_adam = adam_regression(x_train, y_train, x_test, y_test,
-                            m=m, batch_size=256, learning_rate=0.001,
+                            m=m, batch_size=batchsize, learning_rate=0.001,
                             num_epochs=num_epochs, device=device)
 results['Adam'] = hist_adam
 
@@ -61,7 +63,7 @@ print("\n" + "="*60)
 print("Running SAV...")
 print("="*60)
 hist_sav = sav_regression(x_train, y_train, x_test, y_test,
-                          m=m, batch_size=256, C=100, lambda_=4, dt=0.01,
+                          m=m, batch_size=batchsize, C=100, lambda_=4, dt=0.01,
                           num_epochs=num_epochs, device=device)
 results['SAV'] = hist_sav
 
@@ -69,7 +71,7 @@ print("\n" + "="*60)
 print("Running ExpSAV...")
 print("="*60)
 hist_esav = esav_regression(x_train, y_train, x_test, y_test,
-                            m=m, batch_size=256, C=1, lambda_=0, dt=0.01,
+                            m=m, batch_size=batchsize, C=1, lambda_=0, dt=0.01,
                             num_epochs=num_epochs, device=device)
 results['ExpSAV'] = hist_esav
 
@@ -77,7 +79,7 @@ print("\n" + "="*60)
 print("Running IEQ Adaptive...")
 print("="*60)
 hist_ieq_adaptive = ieq_adaptive_regression(x_train, y_train, x_test, y_test,
-                                            m=m, batch_size=256, dt=0.01,
+                                            m=m, batch_size=batchsize, dt=0.01,
                                             num_epochs=num_epochs, device=device)
 results['IEQ_Adaptive'] = hist_ieq_adaptive
 
@@ -86,7 +88,7 @@ print("\n" + "="*60)
 print("Running IEQ (Full Jacobian)...")
 print("="*60)
 hist_ieq = ieq_regression(x_train, y_train, x_test, y_test,
-                          m=m, batch_size=256, dt=0.01,
+                          m=m, batch_size=batchsize, dt=0.01,
                           num_epochs=num_epochs, device=device)
 results['IEQ'] = hist_ieq
 
