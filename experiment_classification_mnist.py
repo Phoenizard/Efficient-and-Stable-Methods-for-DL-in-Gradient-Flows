@@ -41,6 +41,18 @@ except:
 print(f"Data loaded: Train={x_train.shape[0]}, Test={x_test.shape[0]}")
 print(f"Image size: {x_train.shape[1]} features")
 
+# Subsample data: 8000 training samples, 2000 test samples
+print("\nSubsampling data...")
+train_indices = torch.randperm(x_train.shape[0])[:8000]
+test_indices = torch.randperm(x_test.shape[0])[:2000]
+
+x_train = x_train[train_indices]
+y_train = y_train[train_indices]
+x_test = x_test[test_indices]
+y_test = y_test[test_indices]
+
+print(f"After subsampling: Train={x_train.shape[0]}, Test={x_test.shape[0]}")
+
 # Configuration
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"Using device: {device}")
