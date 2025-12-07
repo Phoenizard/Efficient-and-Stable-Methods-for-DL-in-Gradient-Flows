@@ -30,7 +30,11 @@ def sgd_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
     Returns:
         hist: Dictionary with 'train_loss' and 'test_loss' lists
     """
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -80,7 +84,11 @@ def sgd_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
     Returns:
         hist: Dictionary with 'train_loss', 'test_loss', and 'test_accuracy' lists
     """
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -139,7 +147,11 @@ def sgd_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
 def adam_regression(x_train, y_train, x_test, y_test, m=100, batch_size=64,
                     learning_rate=0.1, num_epochs=50000, device='cuda'):
     """Adam optimization for regression tasks."""
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -191,7 +203,11 @@ def sav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
         lambda_: Coefficient for linear operator
         dt: Time step (learning rate)
     """
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -255,7 +271,11 @@ def sav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
 def sav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                        C=100, lambda_=4, dt=0.1, num_epochs=100, inputs=784, outputs=10, device='cuda'):
     """SAV optimization for classification tasks."""
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -338,7 +358,11 @@ def esav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
     ExpSAV (Exponential SAV) optimization for regression tasks.
     Uses exponential auxiliary variable for better numerical stability.
     """
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -401,7 +425,11 @@ def esav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
 def esav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                         C=1, lambda_=0.0, dt=0.1, num_epochs=100, inputs=784, outputs=10, device='cuda'):
     """ExpSAV optimization for classification tasks."""
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -483,7 +511,11 @@ def ieq_regression(x_train, y_train, x_test, y_test, m=100, batch_size=64,
     IEQ (Invariant Energy Quadratization) with full Jacobian for regression tasks.
     Uses exact solution via (I + Δt J J^T)^{-1}.
     """
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -538,7 +570,11 @@ def ieq_regression(x_train, y_train, x_test, y_test, m=100, batch_size=64,
 def ieq_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                        dt=0.1, num_epochs=100, inputs=784, outputs=10, device='cuda'):
     """IEQ with full Jacobian for classification tasks."""
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -617,7 +653,11 @@ def ieq_adaptive_regression(x_train, y_train, x_test, y_test, m=100, batch_size=
     IEQ Adaptive optimization for regression tasks.
     Uses adaptive scaling factor α^n for O(n) complexity instead of O(n³) full Jacobian.
     """
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
@@ -678,7 +718,11 @@ def ieq_adaptive_regression(x_train, y_train, x_test, y_test, m=100, batch_size=
 def ieq_adaptive_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                                 dt=0.1, epsilon=1e-8, num_epochs=100, inputs=784, outputs=10, device='cuda'):
     """IEQ Adaptive optimization for classification tasks."""
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    try:
+        device = torch.device(device)
+    except:
+        print("Device not recognized. Using CPU.")
+        device = torch.device('cpu')
 
     x_train = x_train.to(device)
     y_train = y_train.to(device)
