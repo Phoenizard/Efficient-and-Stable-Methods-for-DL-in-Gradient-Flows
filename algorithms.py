@@ -223,15 +223,16 @@ def sav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
 
     train_losses = []
     test_losses = []
-    r = None
+
+    # Initialize auxiliary variable r with initial loss on full training data
+    with torch.no_grad():
+        initial_loss = criterion(model(x_train), y_train).item()
+        r = math.sqrt(initial_loss + C)
 
     for epoch in range(num_epochs):
-        r = None
         for X, Y in train_loader:
             pred = model(X)
             loss = criterion(pred, Y)
-            if r is None:
-                r = math.sqrt(loss.item() + C)
 
             model.zero_grad()
             loss.backward()
@@ -242,12 +243,17 @@ def sav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                 inv_operator = 1.0 / (1.0 + dt * lambda_)
                 grad_scaled = grad_n * inv_operator
 
-                alpha = dt / math.sqrt(loss.item() + C)
-                theta_n_2 = - alpha * grad_scaled
+                # Save r^n before updating
+                r_n = r
 
+                # Update r: r^{n+1} = r^n / (1 + Δt·S^n/(2(L^n+C)))
                 dot_val = torch.dot(grad_n, grad_scaled)
                 denom = 1.0 + dt * dot_val / (2.0 * (loss.item() + C))
-                r = r / denom
+                r = r_n / denom
+
+                # Parameter update
+                alpha = dt / r_n
+                theta_n_2 = - alpha * grad_scaled
 
                 theta_n_plus_1 = theta_n + r * theta_n_2
 
@@ -294,15 +300,16 @@ def sav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
     train_losses = []
     test_losses = []
     test_accuracies = []
-    r = None
+
+    # Initialize auxiliary variable r with initial loss on full training data
+    with torch.no_grad():
+        initial_loss = criterion(model(x_train), y_train).item()
+        r = math.sqrt(initial_loss + C)
 
     for epoch in range(num_epochs):
-        r = None
         for X, Y in train_loader:
             pred = model(X)
             loss = criterion(pred, Y)
-            if r is None:
-                r = math.sqrt(loss.item() + C)
 
             model.zero_grad()
             loss.backward()
@@ -313,12 +320,17 @@ def sav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                 inv_operator = 1.0 / (1.0 + dt * lambda_)
                 grad_scaled = grad_n * inv_operator
 
-                alpha = dt / math.sqrt(loss.item() + C)
-                theta_n_2 = - alpha * grad_scaled
+                # Save r^n before updating
+                r_n = r
 
+                # Update r: r^{n+1} = r^n / (1 + Δt·S^n/(2(L^n+C)))
                 dot_val = torch.dot(grad_n, grad_scaled)
                 denom = 1.0 + dt * dot_val / (2.0 * (loss.item() + C))
-                r = r / denom
+                r = r_n / denom
+
+                # Parameter update
+                alpha = dt / r_n
+                theta_n_2 = - alpha * grad_scaled
 
                 theta_n_plus_1 = theta_n + r * theta_n_2
 
@@ -378,14 +390,16 @@ def esav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
 
     train_losses = []
     test_losses = []
-    r = None
+
+    # Initialize auxiliary variable r with initial loss on full training data
+    with torch.no_grad():
+        initial_loss = criterion(model(x_train), y_train).item()
+        r = C * math.exp(initial_loss)
 
     for epoch in range(num_epochs):
         for X, Y in train_loader:
             pred = model(X)
             loss = criterion(pred, Y)
-            if r is None:
-                r = C * math.exp(loss.item())
 
             model.zero_grad()
             loss.backward()
@@ -396,12 +410,17 @@ def esav_regression(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                 inv_operator = 1.0 / (1.0 + dt * lambda_)
                 grad_scaled = grad_n * inv_operator
 
-                alpha = dt / (C * math.exp(loss.item()))
-                theta_n_2 = - alpha * grad_scaled
+                # Save r^n before updating
+                r_n = r
 
+                # Update r: r^{n+1} = (r^n)^2 / (r^n + Δt·S^n)
                 dot_val = torch.dot(grad_n, grad_scaled)
-                denom = 1.0 + dt * dot_val
-                r = r / denom
+                denom = 1.0 + dt * dot_val / r_n
+                r = r_n / denom
+
+                # Parameter update: w^{n+1} = w^n - (Δt·r^{n+1}/(r^n)^2)·g̃^n
+                alpha = dt / (r_n * r_n)
+                theta_n_2 = - alpha * grad_scaled
 
                 theta_n_plus_1 = theta_n + r * theta_n_2
 
@@ -448,14 +467,16 @@ def esav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
     train_losses = []
     test_losses = []
     test_accuracies = []
-    r = None
+
+    # Initialize auxiliary variable r with initial loss on full training data
+    with torch.no_grad():
+        initial_loss = criterion(model(x_train), y_train).item()
+        r = C * math.exp(initial_loss)
 
     for epoch in range(num_epochs):
         for X, Y in train_loader:
             pred = model(X)
             loss = criterion(pred, Y)
-            if r is None:
-                r = C * math.exp(loss.item())
 
             model.zero_grad()
             loss.backward()
@@ -466,12 +487,17 @@ def esav_classification(x_train, y_train, x_test, y_test, m=100, batch_size=256,
                 inv_operator = 1.0 / (1.0 + dt * lambda_)
                 grad_scaled = grad_n * inv_operator
 
-                alpha = dt / (C * math.exp(loss.item()))
-                theta_n_2 = - alpha * grad_scaled
+                # Save r^n before updating
+                r_n = r
 
+                # Update r: r^{n+1} = (r^n)^2 / (r^n + Δt·S^n)
                 dot_val = torch.dot(grad_n, grad_scaled)
-                denom = 1.0 + dt * dot_val
-                r = r / denom
+                denom = 1.0 + dt * dot_val / r_n
+                r = r_n / denom
+
+                # Parameter update: w^{n+1} = w^n - (Δt·r^{n+1}/(r^n)^2)·g̃^n
+                alpha = dt / (r_n * r_n)
+                theta_n_2 = - alpha * grad_scaled
 
                 theta_n_plus_1 = theta_n + r * theta_n_2
 
@@ -673,15 +699,16 @@ def ieq_adaptive_regression(x_train, y_train, x_test, y_test, m=100, batch_size=
 
     train_losses = []
     test_losses = []
-    q = None
+
+    # Initialize auxiliary variable q = f(w) - y with initial prediction on full training data
+    with torch.no_grad():
+        initial_pred = model(x_train)
+        q = initial_pred - y_train
 
     for epoch in range(num_epochs):
         for X, Y in train_loader:
             pred = model(X)
             loss = criterion(pred, Y)
-
-            if q is None:
-                q = pred.detach() - Y
 
             model.zero_grad()
             loss.backward()
@@ -741,16 +768,17 @@ def ieq_adaptive_classification(x_train, y_train, x_test, y_test, m=100, batch_s
     train_losses = []
     test_losses = []
     test_accuracies = []
-    q = None
+
+    # Initialize auxiliary variable q = f(w) - y with initial prediction on full training data
+    with torch.no_grad():
+        initial_pred = model(x_train)
+        y_train_onehot = nn.functional.one_hot(y_train, num_classes=outputs).float()
+        q = initial_pred - y_train_onehot
 
     for epoch in range(num_epochs):
         for X, Y in train_loader:
             pred = model(X)
             loss = criterion(pred, Y)
-
-            if q is None:
-                y_onehot = nn.functional.one_hot(Y, num_classes=outputs).float()
-                q = pred.detach() - y_onehot
 
             model.zero_grad()
             loss.backward()
