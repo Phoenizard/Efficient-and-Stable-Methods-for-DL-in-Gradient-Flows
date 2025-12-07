@@ -1,10 +1,10 @@
-# Efficient and Stable Gradient Flow Methods for Deep Learning
+# Energy-Stable Gradient Flow Methods in Deep Learning: An Empirical Evaluation of Theoretical Promises versus Practical Challenges
 
 ## Abstract
 
-This paper investigates deep learning optimization algorithms based on the gradient flow framework, implementing and comparing several efficient and stable optimization methods, including the Scalar Auxiliary Variable (SAV) method, the Exponential Scalar Auxiliary Variable (ExpSAV) method, and the Invariant Energy Quadratization (IEQ) method. We conduct systematic numerical experiments on three regression tasks and one classification task, demonstrating that these methods provide superior numerical stability and computational efficiency while maintaining energy dissipation properties. The experimental results show that the ExpSAV and adaptive IEQ methods exhibit excellent performance in balancing accuracy, stability, and computational efficiency, offering theoretically stronger alternatives for deep learning optimization.
+This paper presents a systematic empirical evaluation of the actual performance of energy-stable optimization methods based on the gradient flow framework in deep learning applications. We implemented six algorithm variants including the Scalar Auxiliary Variable (SAV) method, the Exponential Scalar Auxiliary Variable (ExpSAV) method, and the Invariant Energy Quadratization (IEQ) method, comparing them against traditional methods (SGD, Adam) across three regression tasks and one classification task. The experimental results reveal a significant gap between theoretical elegance and practical difficulties: the ExpSAV method experienced three failures or incomplete training episodes across four experiments, the adaptive IEQ method failed completely on certain tasks, and no algorithm achieved the preset $10^{-4}$ accuracy target in regression tasks. Our study demonstrates that despite possessing rigorous mathematical guarantees, the practical performance of energy-stable methods is highly dependent on hyperparameter configuration and problem characteristics, showing significantly weaker cross-task robustness compared to the traditional Adam optimizer. By honestly reporting these failure cases, this paper provides the academic community with important insights into the limitations of energy-stable methods and identifies key directions for future improvements. Among the tested energy-stable methods, the adaptive IEQ method exhibited relatively the best reliability, though it still requires cautious use with thorough validation.
 
-**Keywords**: Deep Learning, Gradient Flow, Scalar Auxiliary Variable, Invariant Energy Quadratization, Optimization Algorithms
+**Keywords**: Deep Learning, Gradient Flow, Energy-Stable Methods, Optimization Algorithm Evaluation, Failure Case Analysis, Hyperparameter Sensitivity
 
 ---
 
@@ -477,11 +477,13 @@ where $p, q \in \mathbb{R}^D$ are randomly generated parameter vectors. The data
 
 **Summary of numerical results**:
 
-Figure 3.1 presents the performance of six optimization algorithms on the sine-cosine function regression task. From the perspective of convergence dynamics, the ExpSAV and adaptive IEQ methods demonstrate excellent early convergence characteristics, achieving rapid loss function decrease within the first 100 epochs. In contrast, while the SAV method exhibits relatively slower convergence, it can continue to stably reduce the loss value until reaching a low level. The Adam optimizer maintains a steady convergence trend throughout the training process, while the standard SGD method shows obvious convergence lag.
+Figure 3.1 presents the performance of six optimization algorithms on the sine-cosine function regression task, revealing significant inter-algorithm differences. **The most critical finding is that ExpSAV and adaptive IEQ methods completely failed on this task**. ExpSAV's loss remained at approximately $10^1$ magnitude throughout, while the adaptive IEQ method's loss persisted at an extremely high level of $10^6$ magnitude, with both showing virtually no downward trend throughout the 1,000 training epochs. This failure phenomenon may stem from inappropriate hyperparameter settings (such as excessively small learning rates or unreasonable auxiliary variable initialization), or inherent limitations of these algorithms under this specific problem structure.
 
-In terms of final accuracy, the algorithms present significant performance differences. The full Jacobian IEQ method achieves test loss on the order of approximately $10^{-6}$, demonstrating optimal approximation accuracy. Both ExpSAV and adaptive IEQ methods converge to approximately $10^{-5}$ order of magnitude, indicating that they achieve high-precision fitting while maintaining computational efficiency. The final test loss of the SAV method and Adam optimizer is approximately $10^{-4}$ order, while the SGD method only reaches $10^{-3}$ order, reflecting its limitations in high-precision approximation.
+In contrast, the full Jacobian IEQ method (purple curve) performed best, successfully converging to approximately $10^{-3}$ to $10^{-2}$ magnitude, demonstrating optimal approximation accuracy. This validates the high-precision advantage of the full Jacobian method, though its high computational cost must be noted. The Adam optimizer exhibited the second-best performance, stably converging to approximately $10^{-2}$ magnitude, validating the effectiveness of its adaptive learning rate mechanism on standard tasks.
 
-From the perspective of training stability, all auxiliary variable-based methods (SAV, ExpSAV, and IEQ series) exhibit monotonic energy dissipation characteristics, validating their theoretical unconditional stability. Although the Adam and SGD methods show slight fluctuations in training curves, the overall training process maintains an acceptable level of stability.
+The SAV method and SGD showed relatively mediocre performance, both converging to approximately $10^{-1}$ magnitude. Notably, the SAV method's training curve exhibited significant oscillatory behavior. Although this method theoretically possesses energy monotonic decrease guarantees, the severe fluctuations in actual training indicate that its numerical stability on this problem is not ideal. This may be related to the chosen parameters $C=100$ and $\lambda=4$ being insufficiently adapted to this task.
+
+**Important lesson**: This experiment clearly demonstrates that **theoretical stability guarantees do not equate to excellent performance in practice**. The complete failure of ExpSAV and adaptive IEQ methods highlights the critical importance of hyperparameter selection and problem compatibility. Even energy-stable methods with rigorous mathematical foundations can produce worse results than simple methods (such as Adam) if parameters are inappropriately configured or mismatched with problem characteristics. This emphasizes that in practical applications, one cannot blindly rely on theoretical guarantees but must conduct thorough experimental validation and parameter tuning.
 
 ### 3.3 Experiment 2: Quadratic Function Regression
 
@@ -510,11 +512,15 @@ where $c \in \mathbb{R}^D$ is a randomly generated coefficient vector. The datas
 
 ![Experiment 2 Loss Curves](../results/experiment_2/loss_comparison.png)
 
-**Figure 3.2** Comparison of training and test losses for Experiment 2 (Quadratic Function Regression).
+**Figure 3.2** Comparison of training and test losses for Experiment 2 (Quadratic Function Regression). The left panel shows training loss, and the right panel shows test loss, with the vertical axis on a logarithmic scale.
 
 **Key observations**:
 
-The experimental results of the quadratic function regression task reveal the performance characteristics of different optimization algorithms on structured problems. Due to the special quadratic form property of the target function itself, all tested algorithms achieved effective convergence within the 100-epoch training cycle, reflecting the relatively low optimization difficulty of this task. In this scenario, the IEQ series methods demonstrate significant performance advantages, with their excellent performance attributable to the natural fit between the algorithm framework and the problem's inherent quadratic structure. The Adam optimizer also achieved convergence effects comparable to the IEQ methods in this task, proving the effectiveness of the adaptive learning rate mechanism in handling well-conditioned optimization problems. In comparison, while the SAV method maintains stable monotonic descent characteristics, its final convergence accuracy is slightly inferior to the above methods, indicating that algorithm performance exhibits certain differentiated manifestations under specific problem structures.
+The experimental results of the quadratic function regression task reveal an unexpected phenomenon: **all tested algorithms failed to achieve effective convergence within the 100-epoch training cycle**. As observed in Figure 3.2, the training loss remains at the $10^1$ to $10^2$ magnitude level, while the test loss stays around the $10^2$ magnitude, far from reaching the ideal low loss level. The failure of this experiment may stem from multiple aspects.
+
+First, the mismatch between model architecture and problem characteristics is a primary cause. The single-hidden-layer neural network with ReLU activation function theoretically struggles to precisely fit a pure quadratic function form, as ReLU networks essentially construct combinations of piecewise linear functions rather than smooth quadratic surfaces. Second, hyperparameter configuration may be problematic, including inappropriate learning rate settings, insufficient network width (1,000 hidden layer neurons may not be enough), or too few training epochs. Third, the initialization strategy may have led the optimization to become trapped in poor local minima, preventing all algorithms from finding paths toward the global optimum. Finally, the data distribution characteristics warrant attention, as the uniform distribution of input features in the interval $(0,5)$ may not sufficiently match the gradient structure of the quadratic function, leading to optimization difficulties.
+
+This experimental case provides an important negative lesson, demonstrating that even seemingly simple quadratic function fitting problems can lead to training failure in deep learning frameworks due to inappropriate architecture selection, hyperparameter settings, or optimization strategies. This emphasizes the need to carefully consider the compatibility between problem characteristics and model design in practical applications, rather than simply assuming that neural networks can automatically learn arbitrary functional forms. The failure of this experiment also indicates that while energy-stable methods provide theoretical stability guarantees, this does not automatically resolve fundamental issues such as insufficient model expressiveness or inappropriate hyperparameter configuration.
 
 ### 3.4 Experiment 3: Gaussian Function Regression
 
@@ -613,20 +619,24 @@ Based on comprehensive performance across four experimental tasks, we conducted 
 
 #### 3.6.2 Convergence Speed Comparison
 
-To quantitatively evaluate the convergence efficiency of each optimization algorithm, we compiled statistics on the number of training epochs required to reach the test loss threshold of $10^{-4}$ in regression tasks, as well as the number of iterations to achieve 90% accuracy in classification tasks. Tables 3.6 and 3.7 present these key performance indicators respectively.
+To quantitatively evaluate the convergence efficiency of each optimization algorithm, we compiled statistics on the number of training epochs required to reach the test loss threshold of $10^{-4}$ in regression tasks, as well as the number of iterations to achieve 90% accuracy in classification tasks. Tables 3.6 and 3.7 present these key performance indicators respectively. It should be specially noted that all algorithms failed to converge successfully in Experiment 2 (Quadratic Function Regression), and therefore this experiment is not included in the convergence speed statistics.
 
 **Table 3.6** Number of epochs required to converge to test loss < $10^{-4}$ in regression tasks
 
 | Algorithm | Experiment 1 | Experiment 2 | Experiment 3 |
 |-----------|-------------|-------------|-------------|
-| IEQ (Full Jacobian) | ~500 | ~30 | ~40 |
-| ExpSAV | ~800 | ~50 | ~30 |
-| IEQ (Adaptive) | ~1000 | ~40 | ~50 |
-| SAV | >1000 | ~60 | ~70 |
-| Adam | ~1200 | ~35 | ~60 |
-| SGD | Not converged | ~80 | Not converged |
+| IEQ (Full Jacobian) | Not reached* | Failed† | ~40 |
+| ExpSAV | Failed‡ | Failed† | ~30 |
+| IEQ (Adaptive) | Failed‡ | Failed† | ~50 |
+| SAV | Not reached* | Failed† | ~70 |
+| Adam | Not reached* | Failed† | ~60 |
+| SGD | Not converged | Failed† | Not converged |
 
-From the convergence data of regression tasks, it can be observed that the full Jacobian IEQ method demonstrates the fastest convergence speed in all three test scenarios, particularly in Experiments 2 and 3, requiring only 30 and 40 epochs respectively to reach target accuracy. The ExpSAV method achieved excellent convergence performance of approximately 30 epochs in Experiment 3 (Gaussian function regression), demonstrating its efficiency advantage in handling problems with complex gradient structures. It is noteworthy that the standard SGD method failed to converge to target accuracy within a reasonable training cycle in Experiments 1 and 3, highlighting its inherent limitations in high-precision approximation tasks.
+*Note: In Experiment 1, these algorithms converged to $10^{-2}$ to $10^{-1}$ magnitude but failed to reach the $10^{-4}$ target accuracy.  
+†Note: In Experiment 2, all algorithms failed to converge to target accuracy due to mismatch between model architecture and problem characteristics.  
+‡Note: ExpSAV and adaptive IEQ methods completely failed in Experiment 1, with losses remaining at $10^1$ and $10^6$ magnitudes respectively.
+
+From the convergence data of regression tasks, it can be observed that **only Experiment 3 (Gaussian Function Regression) achieved relatively successful results**. In Experiment 3, the ExpSAV method achieved the fastest convergence performance at approximately 30 epochs, the full Jacobian IEQ method required approximately 40 epochs, while other methods required 50-70 epochs. The results of Experiment 1 indicate that ExpSAV and adaptive IEQ methods completely failed on this task, likely due to severely inappropriate hyperparameter configuration. Experiment 2 revealed the importance of model architecture selection, with all algorithms failing because ReLU networks struggle to fit pure quadratic functions. The combined results of these three experiments strongly suggest that **algorithm performance is highly dependent on the compatibility of problem characteristics, model architecture, and hyperparameter configuration; no algorithm performs excellently across all scenarios**.
 
 **Table 3.7** Number of epochs required to converge to 90% accuracy in classification task
 
@@ -724,3 +734,13 @@ It is particularly noteworthy that the ExpSAV and adaptive IEQ methods exhibit e
 5. Kingma, D. P., & Ba, J. (2014). Adam: A method for stochastic optimization. *arXiv preprint arXiv:1412.6980*.
 
 6. Ruder, S. (2016). An overview of gradient descent optimization algorithms. *arXiv preprint arXiv:1609.04747*.
+
+---
+
+**Author Information**:
+- Experimental Implementation: Based on PyTorch framework
+- Reference Paper: Ma et al., Journal of Computational Physics (2024)
+- Last Updated: December 2025
+
+**Acknowledgments**:
+We thank Professor Jie Shen and his collaborators for their pioneering work on the original SAV/IEQ methods.
