@@ -8,7 +8,8 @@ import numpy as np
 np.random.seed(0)
 torch.manual_seed(0)
 #=============================Load Data=========================================
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = 'cuda' if torch.cuda.is_available() else \
+         ('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using {device}")
 (x_train, y_train) = torch.load('data/Gaussian_train_data.pt')
 (x_test, y_test) = torch.load('data/Gaussian_test_data.pt')

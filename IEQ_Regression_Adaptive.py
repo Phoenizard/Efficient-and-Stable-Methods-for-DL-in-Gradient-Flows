@@ -7,7 +7,8 @@ import numpy as np
 from utilize import flatten_params, unflatten_params, flatten_grad
 np.random.seed(0)
 torch.manual_seed(0)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = 'cuda' if torch.cuda.is_available() else \
+         ('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using {device}")
 #=============================Load Data=========================================
 (x_train, y_train) = torch.load('data/Gaussian_train_data.pt')

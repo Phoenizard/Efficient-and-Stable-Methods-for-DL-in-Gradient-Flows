@@ -30,7 +30,8 @@ print("\nLoading data...")
 print(f"Data loaded: Train={x_train.shape[0]}, Test={x_test.shape[0]}, Dim={x_train.shape[1]}")
 
 # Configuration
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda' if torch.cuda.is_available() else \
+         ('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
 m = 1000  # Number of neurons
 num_epochs = 1000

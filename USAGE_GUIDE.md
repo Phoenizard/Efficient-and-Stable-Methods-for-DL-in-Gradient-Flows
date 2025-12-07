@@ -182,7 +182,8 @@ model = hist['model']
 所有算法都支持GPU加速。只需确保安装了支持CUDA的PyTorch，脚本会自动检测并使用GPU:
 
 ```python
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda' if torch.cuda.is_available() else \
+         ('mps' if torch.backends.mps.is_available() else 'cpu')
 ```
 
 ## 实验结果
