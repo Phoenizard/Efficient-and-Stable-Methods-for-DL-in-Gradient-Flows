@@ -736,7 +736,7 @@ def ieq_adaptive_regression(x_train, y_train, x_test, y_test, m=100, batch_size=
             train_losses.append(train_loss)
             test_losses.append(test_loss)
 
-            if (epoch + 1) % 1000 == 0:
+            if (epoch + 1) % 10 == 0:
                 print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.8f}, Test Loss: {test_loss:.8f}")
 
     return {'train_loss': train_losses, 'test_loss': test_losses, 'model': model}

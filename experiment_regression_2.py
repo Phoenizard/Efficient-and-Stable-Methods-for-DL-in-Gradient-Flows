@@ -34,7 +34,7 @@ device = 'cuda' if torch.cuda.is_available() else \
          ('mps' if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
 m = 1000  # Number of neurons
-num_epochs = 1000
+num_epochs = 100
 
 # Store all results
 results = {}
@@ -44,7 +44,7 @@ print("\n" + "="*60)
 print("Running SGD...")
 print("="*60)
 hist_sgd = sgd_regression(x_train, y_train, x_test, y_test,
-                          m=m, batch_size=64, learning_rate=0.001,
+                          m=m, batch_size=64, learning_rate=0.01,
                           num_epochs=num_epochs, device=device)
 results['SGD'] = hist_sgd
 
@@ -64,20 +64,20 @@ hist_sav = sav_regression(x_train, y_train, x_test, y_test,
                           num_epochs=num_epochs, device=device)
 results['SAV'] = hist_sav
 
-print("\n" + "="*60)
-print("Running ExpSAV...")
-print("="*60)
-hist_esav = esav_regression(x_train, y_train, x_test, y_test,
-                            m=m, batch_size=64, C=1, lambda_=1, dt=0.01,
-                            num_epochs=num_epochs, device=device)
-results['ExpSAV'] = hist_esav
+# print("\n" + "="*60)
+# print("Running ExpSAV...")
+# print("="*60)
+# hist_esav = esav_regression(x_train, y_train, x_test, y_test,
+#                             m=m, batch_size=64, C=1, lambda_=1, dt=0.01,
+#                             num_epochs=num_epochs, device=device)
+# results['ExpSAV'] = hist_esav
 
 print("\n" + "="*60)
 print("Running IEQ (Full Jacobian)...")
 print("="*60)
 hist_ieq = ieq_regression(x_train, y_train, x_test, y_test,
                           m=m, batch_size=64, dt=0.01,
-                          num_epochs=num_epochs, device=device)
+                          num_epochs=int(num_epochs/2), device=device)
 results['IEQ'] = hist_ieq
 
 print("\n" + "="*60)

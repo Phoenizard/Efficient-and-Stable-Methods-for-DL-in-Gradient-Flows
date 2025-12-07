@@ -88,20 +88,10 @@ print("\n" + "="*60)
 print("Running ExpSAV...")
 print("="*60)
 hist_esav = esav_classification(x_train, y_train, x_test, y_test,
-                                m=m, batch_size=256, C=1, lambda_=0, dt=0.1,
+                                m=m, batch_size=256, C=1, lambda_=1e-6, dt=0.1,
                                 num_epochs=num_epochs, inputs=inputs, outputs=outputs,
                                 device=device)
 results['ExpSAV'] = hist_esav
-
-
-print("\n" + "="*60)
-print("Running IEQ...")
-print("="*60)
-hist_ieq = ieq_classification(x_train, y_train, x_test, y_test,
-                              m=m, batch_size=256, dt=0.1,
-                              num_epochs=num_epochs, inputs=inputs, outputs=outputs,
-                              device=device)
-results['IEQ'] = hist_ieq
 
 
 print("\n" + "="*60)
@@ -112,6 +102,16 @@ hist_ieq_adaptive = ieq_adaptive_classification(x_train, y_train, x_test, y_test
                                                 num_epochs=num_epochs, inputs=inputs,
                                                 outputs=outputs, device=device)
 results['IEQ_Adaptive'] = hist_ieq_adaptive
+
+
+print("\n" + "="*60)
+print("Running IEQ...")
+print("="*60)
+hist_ieq = ieq_classification(x_train, y_train, x_test, y_test,
+                              m=m, batch_size=256, dt=0.1,
+                              num_epochs=int(num_epochs/5), inputs=inputs, outputs=outputs,
+                              device=device)
+results['IEQ'] = hist_ieq
 
 # Save results
 print("\n" + "="*60)
